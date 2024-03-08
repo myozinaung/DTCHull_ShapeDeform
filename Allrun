@@ -6,7 +6,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 touch case.foam 
 
 # Create motion files
-runApplication -s createMotion python3 DTC_PointGen.ipynb
+jupyter nbconvert --to python DTC_PointGen.ipynb
+runApplication -s createMotion python3 DTC_PointGen.py
 
 mkdir -p constant/triSurface
 
@@ -30,7 +31,7 @@ done
 
 runApplication -s forSnappyHexMesh decomposePar # decompose to run snappyHexMesh in parallel
 runParallel snappyHexMesh -overwrite
-runParallel redistributePar -reconstruct -constant -overwrite # (not work in OF10)
+runParallel -s forSnappyHexMesh redistributePar -reconstruct -constant -overwrite # (not work in OF10)
 rm -rf processor* # clean decomposed mesh not to interfere with interFoam decomposition
 runApplication checkMesh -allGeometry -allTopology #-writeAllFields #-writeSets vtk
 
@@ -46,7 +47,6 @@ runParallel renumberMesh -overwrite
 # # adjust deltaT and maxDeltaT in system/controlDict 
 
 runParallel $(getApplication)
-
 
 runParallel -s reconstruct redistributePar -reconstruct
 
